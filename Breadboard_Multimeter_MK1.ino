@@ -2,7 +2,7 @@
   Title: Breadboard Multimeter MK1
    - Description: Breadboard Multimeter using Arduino Every or Nano, INA219, and SSD1306 OLED Screen
 
-  Version: 0.8
+  Version: 1.0
   Date: 2021 / 05 / 15
   Author: Austin St. Aubin
   Email: AustinSaintAubin@gmail.com
@@ -73,42 +73,6 @@ MovingAverageFloat <moving_average_samples> power_W_avg;
 Adafruit_INA219 ina219;
 
 // Line Graphs
-/*
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// -- Class [ Display Graph ]  Display line graph in area.
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class LineGraph { // x0, y0, x1, y1, min, max
-  // private:
-    // Class Member Variables
-    // Variables initialized at startup
-    byte x, y;
-    byte width, height;
-    float min, max;
-
-    byte graph_progress = 0;
-
-    // Variables to maintain the current state
-    //byte plot_data [128 +2] = { 0 }; // all elements 0  // JUST GOING TO START WITH 65 (width + 1)
-    //byte plot_data [];  // Setting size in constructor
-    int8_t *plot_data;  // Setting size in constructor
-    #define FLT_MAX 3.4028235E+38
-
-    // Map Float Fuction
-    float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
-
-  public:
-    Adafruit_SSD1306 *display;
-    //TwoWire *wire (TwoWire *twi = &Wire)
-    
-    //LineGraph(unsigned int x_0, unsigned int y_0, unsigned int x_1, unsigned int y_1, float graph_value_min, float graph_value_max, Adafruit_SSD1306 *disp = &display);
-    LineGraph(byte x_0, byte y_0, byte x_1_width, byte y_1_height, float graph_value_min, float graph_value_max, Adafruit_SSD1306 &display);
-    void config(byte x_0, byte y_0, byte x_1_width, byte y_1_height, float graph_value_min, float graph_value_max, Adafruit_SSD1306 &display);
-    void plot(float value, float graph_value_min, float graph_value_max);
-    void plot(float graph_value_min, float graph_value_max);
-    void plot(float value);
-    void plot();
-};
-*/
 #include "graph.h"
 // LineGraph graphVotage (x, y, width, height, min, max, display);
 LineGraph graphVotage (0,                  0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 3.3, 5, display);
@@ -258,7 +222,6 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   static float  current_A_max = current_A;
   static float  current_A_min = current_A;
   
-  
   // Voltage Min, Max, Average
   if (voltage_load_V > voltage_load_V_max) {
     voltage_load_V_max = voltage_load_V;
@@ -268,7 +231,6 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  voltage_load_V_avg = voltage_load_V_avg + (voltage_load_V - voltage_load_V_avg) / min(avg_samples, avg_factor);
   voltage_load_V_avg.add(voltage_load_V);
   
-  
   // Current Min, Max, Average
   if (current_A > current_A_max) {
     current_A_max = current_A;
@@ -277,7 +239,6 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
 //  current_A_avg = current_A_avg + (current_A - current_A_avg) / min(avg_samples, avg_factor);
   current_A_avg.add(current_A);
-
 
   // Wattage Average
   power_W_avg.add(power_W);
@@ -344,7 +305,7 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (screen >= screens) { screen = 0; } // Reset Screen Count, really this is just to prevent overflow of the screens varrable.
   switch (screen % screens) {
     default: // Graphing -------------------------------
-         
+      
       // Display Volts & Amps
       displayValueUnit(voltage_load_V, "V", 2, (SCREEN_WIDTH / 2), 0, 0);
       displayValueUnit(current_A,      "A", 1, (SCREEN_WIDTH / 2), (SCREEN_WIDTH / 2), 0);
@@ -365,11 +326,11 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       
       break;
     case 1:  // Current/Max/Min Screen -----------------
-    
+      
       // Display Header
       display.setCursor(0, 0);
       display.print("Current / Max / Min");
-    
+      
       // Display Volts & Amps
       #define TEXT_OFFSET 12 // number of decial places to show
 //      Y_ROW = 0;  display.setCursor(0, Y_ROW); display.print("#:"); displayValueUnit(voltage_load_V,     "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(current_A,     "A", 1, 0, (SCREEN_WIDTH / 2) + TEXT_OFFSET, Y_ROW);
@@ -380,11 +341,11 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       
       break;
     case 2:  // Stats Screen ---------------------------
-    
+      
       // Display Header
       display.setCursor(0, 0);
       display.print("Additional Stats");
-    
+      
       // Display Volts & Amps
       #define TEXT_OFFSET 0 // number of decial places to show
       Y_ROW = 8;  displayValueUnit(voltage_load_V,  "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(current_A,                 "A", 1, 0, (SCREEN_WIDTH / 2) + (TEXT_OFFSET / 2), Y_ROW);
@@ -430,13 +391,13 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void BUTTON_ISR() { // ISR to be get called on button press/release
   static unsigned long lastInterruptTime = 0;
   unsigned long interruptTime = millis();
-
+  
   // If interrupts come faster than 100ms, assume it's a bounce and ignore.
   if (interruptTime - lastInterruptTime > 100) {
     // Increase Screen Index
     screen++;
   }
-
+  
   // Keep track of when we were here last (no more than every 5ms)
   lastInterruptTime = interruptTime;
 }
@@ -469,7 +430,7 @@ String getESUM(float value, char* value_unit, byte precision) {
     value_unit_measure      /= pow(10, -3);
     value_unit_measure_char = 'm';
   } 
-
+  
   // Formate Value to String
   String output_str = String(value_unit_measure, precision);
 
@@ -510,165 +471,3 @@ void displayValueUnit(float value, char* value_unit, byte precision, byte width,
   // Display the Value & Standard Electrical Units of Measure String
   display.print(output_str);
 }
-
-
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Constructor [ Display Graph ]  Display line graph in area.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//LineGraph::LineGraph(byte x_0, byte y_0, byte x_1_width, byte y_1_height, float graph_value_min, float graph_value_max, Adafruit_SSD1306 &disp) {
-//  config(x_0, y_0, x_1_width, y_1_height, graph_value_min, graph_value_max, disp);
-//}
-//
-//
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Constructor [ Display Graph ]  Display line graph in area.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void LineGraph::config(byte x_0, byte y_0, byte x_1_width, byte y_1_height, float graph_value_min, float graph_value_max, Adafruit_SSD1306 &disp) {
-//  // initialize All Variables
-//  x = x_0;
-//  y = y_0;
-//  width  = x_1_width;
-//  height = y_1_height;
-//  
-//  // Pass Display Class 
-//  display = &disp;
-//  
-//  // set min and max values expected for graph
-//  min = graph_value_min;
-//  max = graph_value_max;
-//  
-//  // Set Array Size, zeroed
-//  plot_data = new int8_t[width] { 0 };
-//  
-//  // Set Array Initial Value
-//  for (int i = width; i > 0; --i) {
-//    plot_data[i] = FLT_MAX;
-//  }
-//}
-//
-//
-//
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Fuction [ Display Graph ]  Display line graph in area, just draw last plot.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void LineGraph::plot() {
-//  // Plot Data
-//  LineGraph::plot(FLT_MAX);
-//}
-//
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Fuction [ Display Graph ]  Display line graph in area, just draw last plot.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void LineGraph::plot(float graph_value_min, float graph_value_max) {
-//  // Plot Data
-//  LineGraph::plot(FLT_MAX, graph_value_min, graph_value_max);
-//}
-//
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Fuction [ Display Graph ]  Display line graph in area.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void LineGraph::plot(float value, float graph_value_min, float graph_value_max) {
-//
-//  // Clear if net Min/Max
-//  if (min != graph_value_min || max != graph_value_max) {
-//    // set min and max values expected for graph
-//    min = graph_value_min;
-//    max = graph_value_max;
-//    
-//    // Set Array Initial Value (Clear)
-//    for (int i = width; i > 0; --i) {
-//      plot_data[i] = FLT_MAX;
-//    }
-//  }
-//
-//  // Plot Data
-//  LineGraph::plot(value);
-//}
-//
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//// -- Class Fuction [ Display Graph ]  Display line graph in area.
-//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//void LineGraph::plot(float value) {
-//  // Offset Varables
-//  int8_t offset_frame = 6;
-//  int8_t offset = 0;
-//  
-//  // Check if value out of range, or null value.
-//  if (value != FLT_MAX) {
-//    // Get latest reading
-//    //plot_data[0] = mapfloat(value, min, max, 0, height);
-//    plot_data[0] = mapfloat(value, min, max, 0 +offset_frame, height -offset_frame);
-//  }
-//
-//  // Set Offset
-//  if ( plot_data[0] > ((byte)height - offset_frame) ) {
-//    // Offset Max
-//    offset = (plot_data[0] - height) + offset_frame;
-//  } else if ( plot_data[0] < 0 + offset_frame) {
-//    // Offset Min
-//    offset = plot_data[0] - offset_frame;
-//  }
-//
-//  // Debug
-//  #ifdef DEBUG
-//  Serial.println("0 | x:" + (String)x + " y:" + (String)y +  " | width:" + width + " height:" + height + " | " + (String)plot_data[0]+  + " | offset:" + (String)offset + " | mapped:" + (String)value_mapped + "  x: " + (String)(0 + x) + ", y:" + (String)(  ((height + y) - (map(plot_data[0], min, max, 0, height)))   ));
-//
-//  // Display Screen Location
-//  if (plot_data[0] < 0)
-//    display->setCursor(width -30, height -9);
-//  else
-//    display->setCursor(width -24, height -9);
-//  display->setTextSize(1);
-//  display->println(plot_data[0]);
-//  #endif
-//
-//  // Line Graph
-//  byte plot_data_mapped = 0;
-//  for( byte i = 0; i < width; i++ ) {
-//    plot_data_mapped = plot_data[i] - offset;
-//
-//    // Plot & Display Graph
-//    if ( plot_data_mapped <= height && plot_data_mapped >= 0 ) {
-//      // 1 | x0:0 y0:24 x1:47 y1:63 | width:47 height:39 | 40.49  x: 1, y:54
-//      #ifdef DEBUG
-//      Serial.println((String)i + " | " + "x:" + (String)x + " y:" + (String)y +  " | width:" + width + " height:" + height + " | " + (String)plot_data[i]+ " | mapped:" + (String)mapfloat(plot_data[i], min, max, 0, height) + "  x: " + (String)(i + x) + ", y:" + (String)(  ((height + y) - (map(plot_data[i], min, max, 0, height)))   ));
-//      #endif
-//      
-//      // Display Pixel
-//      display->drawPixel(i + x, (height + y) - constrain(plot_data_mapped, 0, height), WHITE);
-//    }
-//  }
-//  
-//  // Side Lines
-//  for( byte i = 0; i < height; i++ ) {
-//    if ( !((i - offset) % 8) ) {
-//      display->drawPixel(x, y + i, WHITE);
-//      display->drawPixel(x + width -1, y + i, WHITE);
-//    }
-//  }
-//  
-//  // Base Lines
-//  for( byte i = 0; i < width; i++ ) {
-//    if ( !((i - graph_progress) % 16) ) {
-//      display->drawPixel(i + x, height -1 + y, WHITE);
-//    }
-//  }
-//
-//  // Check if value out of range, or null value.
-//  if (value != FLT_MAX) {
-//    // Shift Plotted Graph
-//    for( byte i = width; i > 0; i-- ) {
-//      plot_data[i] = plot_data[i -1];
-//      // Serial.println((String)i + " | " + "plot:" + plot_data[i]);
-//    }
-//
-//    // Shift for Base Lines
-//    graph_progress++;
-//  }
-//}
-//
-//
-//float LineGraph::mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
-//{
-//return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-//}
