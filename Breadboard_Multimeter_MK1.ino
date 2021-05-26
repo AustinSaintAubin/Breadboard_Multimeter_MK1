@@ -2,7 +2,7 @@
   Title: Breadboard Multimeter MK1
    - Description: Breadboard Multimeter using Arduino Every or Nano, INA219, and SSD1306 OLED Screen
 
-  Version: 1.1
+  Version: 1.2
   Date: 2021 / 05 / 25
   Author: Austin St. Aubin
   Email: AustinSaintAubin@gmail.com
@@ -75,8 +75,8 @@ Adafruit_INA219 ina219;
 
 // Line Graphs
 #include "graph.h"
-// LineGraph graphVotage (x, y, width, height, min, max, display);
-LineGraph graphWattage(0,                  0,       SCREEN_WIDTH, SCREEN_HEIGHT,   0,   40, display);
+// LineGraph graph(x, y, width, height, min, max, display);
+LineGraph graphWattage(0,                  0,       SCREEN_WIDTH, SCREEN_HEIGHT,   0, 0.25, display);
 LineGraph graphVotage (0,                  0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 3.3,    5, display);
 LineGraph graphCurrent((SCREEN_WIDTH / 2), 0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 0.0, 0.25, display);
 
@@ -310,11 +310,12 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
       // Display Wattage
       displayValueUnit(voltage_load_V, "V", 2, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 0, 0);
-      displayValueUnit(power_W,        "W", 2, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 1, 0);
+      displayValueUnit(power_W,        "W", 1, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 1, 0);
       displayValueUnit(current_A,      "A", 1, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 2, 0);
 
       // Display Inverse Round Rectangle
       display.fillRoundRect((SCREEN_WIDTH / 3), 0, (SCREEN_WIDTH / 3) * 1, 8, 2, INVERSE);
+//      display.drawFastHLine((SCREEN_WIDTH / 3), 8, (SCREEN_WIDTH / 3) * 1, INVERSE);
       
       // Update Display Graph & Serial Plotting
       if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
