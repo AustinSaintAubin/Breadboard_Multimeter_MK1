@@ -2,8 +2,8 @@
   Title: Breadboard Multimeter MK1
    - Description: Breadboard Multimeter using Arduino Every or Nano, INA219, and SSD1306 OLED Screen
 
-  Version: 1.0
-  Date: 2021 / 05 / 15
+  Version: 1.1
+  Date: 2021 / 05 / 25
   Author: Austin St. Aubin
   Email: AustinSaintAubin@gmail.com
   Released under a MIT license: http://opensource.org/licenses/MIT
@@ -16,6 +16,7 @@ essd
    - https://github.com/adafruit/Adafruit_SSD1306
    - https://github.com/adafruit/Adafruit-GFX-Library
    - https://github.com/pilotak/MovingAverageFloat
+   - https://www.electronics-tutorials.ws/dccircuits/dcp_3.html
 
   ============================================================================= */
 // [ Included Library's ]
@@ -50,7 +51,7 @@ const int button_1_pin = 2;
 
 // [ Global Variables ]
       byte screen  = 0;  // Current/Default Screen Page
-const byte screens = 4;  // Quanity of Screens
+const byte screens = 5;  // Quanity of Screens
 
 // [ Global Class Constructors ]
 
@@ -75,7 +76,8 @@ Adafruit_INA219 ina219;
 // Line Graphs
 #include "graph.h"
 // LineGraph graphVotage (x, y, width, height, min, max, display);
-LineGraph graphVotage (0,                  0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 3.3, 5, display);
+LineGraph graphWattage(0,                  0,       SCREEN_WIDTH, SCREEN_HEIGHT,   0,   40, display);
+LineGraph graphVotage (0,                  0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 3.3,    5, display);
 LineGraph graphCurrent((SCREEN_WIDTH / 2), 0, (SCREEN_WIDTH / 2), SCREEN_HEIGHT, 0.0, 0.25, display);
 
 
@@ -304,7 +306,30 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   byte Y_ROW = 0;
   if (screen >= screens) { screen = 0; } // Reset Screen Count, really this is just to prevent overflow of the screens varrable.
   switch (screen % screens) {
-    default: // Graphing -------------------------------
+    default: // Graphing Wattage -----------------------
+    
+      // Display Wattage
+      displayValueUnit(voltage_load_V, "V", 2, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 0, 0);
+      displayValueUnit(power_W,        "W", 2, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 1, 0);
+      displayValueUnit(current_A,      "A", 1, (SCREEN_WIDTH / 3), (SCREEN_WIDTH / 3) * 2, 0);
+
+      // Display Inverse Round Rectangle
+      display.fillRoundRect((SCREEN_WIDTH / 3), 0, (SCREEN_WIDTH / 3) * 1, 8, 2, INVERSE);
+      
+      // Update Display Graph & Serial Plotting
+      if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
+        // Graph
+        graphWattage.plot(power_W);
+        
+        // Update Last Millis Time
+        millis_last_update_graph = millis_current;
+      } else { 
+        // Show Graph wo/ changed values
+        graphWattage.plot();
+      }
+
+      break;
+    case 1:  // Graphing Volts & Amps --------------------
       
       // Display Volts & Amps
       displayValueUnit(voltage_load_V, "V", 2, (SCREEN_WIDTH / 2), 0, 0);
@@ -325,7 +350,7 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       }
       
       break;
-    case 1:  // Current/Max/Min Screen -----------------
+    case 2:  // Current/Max/Min Screen -----------------
       
       // Display Header
       display.setCursor(0, 0);
@@ -340,7 +365,7 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       Y_ROW = 24; display.setCursor(0, Y_ROW); display.print("-:"); displayValueUnit(voltage_load_V_min, "V", 2, 0, TEXT_OFFSET, Y_ROW); displayValueUnit(current_A_min,  "A", 1, 0, (SCREEN_WIDTH / 2) + TEXT_OFFSET, Y_ROW);
       
       break;
-    case 2:  // Stats Screen ---------------------------
+    case 3:  // Stats Screen ---------------------------
       
       // Display Header
       display.setCursor(0, 0);
@@ -353,7 +378,7 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       Y_ROW = 24; displayValueUnit(voltage_shunt_V, "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(power_W,                   "W", 1, 0, (SCREEN_WIDTH / 2) + (TEXT_OFFSET / 2), Y_ROW);
       
       break;
-    case 3:  // Battery Estimator Screen ---------------
+    case 4:  // Battery Estimator Screen ---------------
     
       // Display Header
       display.setCursor(0, 0);
