@@ -74,12 +74,21 @@ void LineGraph::plot(float value, float graph_value_min, float graph_value_max) 
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// -- Class Fuction [ Display Graph ]  Display line graph in area.
+// -- Class Fuction [ Update & Store Values for Graph ]  Update the values, but do not show anything
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void LineGraph::plot(float value) {
-  // Offset Varables
-  int8_t offset_frame = 6;
-  int8_t offset = 0;
+void LineGraph::store(float value) {
+
+  // Check if value out of range, or null value.
+  if (value != FLT_MAX) {
+    // Shift Plotted Graph
+    for( byte i = width; i > 0; i-- ) {
+      plot_data[i] = plot_data[i -1];
+      // Serial.println((String)i + " | " + "plot:" + plot_data[i]);
+    }
+    
+    // Shift for Base Lines
+    graph_progress++;
+  }
   
   // Check if value out of range, or null value.
   if (value != FLT_MAX) {
@@ -87,7 +96,21 @@ void LineGraph::plot(float value) {
     //plot_data[0] = mapfloat(value, min, max, 0, height);
     plot_data[0] = mapfloat(value, min, max, 0 +offset_frame, height -offset_frame);
   }
+}
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// -- Class Fuction [ Display Graph ]  Display line graph in area.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void LineGraph::plot(float value) {
+
+  // Store Lastest Value and Shift Array
+  LineGraph::store(value);
+  
+  // Offset Varables
+  //int8_t offset_frame = 6;
+  int8_t offset = 0;
+  
   // Set Offset
   if ( plot_data[0] > ((byte)height - offset_frame) ) {
     // Offset Max
@@ -140,18 +163,6 @@ void LineGraph::plot(float value) {
     if ( !((i - graph_progress) % 16) ) {
       display->drawPixel(i + x, height -1 + y, WHITE);
     }
-  }
-
-  // Check if value out of range, or null value.
-  if (value != FLT_MAX) {
-    // Shift Plotted Graph
-    for( byte i = width; i > 0; i-- ) {
-      plot_data[i] = plot_data[i -1];
-      // Serial.println((String)i + " | " + "plot:" + plot_data[i]);
-    }
-
-    // Shift for Base Lines
-    graph_progress++;
   }
 }
 

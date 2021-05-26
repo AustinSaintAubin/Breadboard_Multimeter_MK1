@@ -14,6 +14,8 @@ class LineGraph { // x0, y0, x1, y1, min, max
     byte width, height;
     float min, max;
 
+    const int8_t offset_frame = 6;
+
     byte graph_progress = 0;
 
     // Variables to maintain the current state
@@ -36,5 +38,6 @@ class LineGraph { // x0, y0, x1, y1, min, max
     void plot(float graph_value_min, float graph_value_max);
     void plot(float value);
     void plot();
+    void store(float value);
 };
 #endif

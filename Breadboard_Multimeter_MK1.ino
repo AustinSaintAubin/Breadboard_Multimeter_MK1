@@ -2,7 +2,7 @@
   Title: Breadboard Multimeter MK1
    - Description: Breadboard Multimeter using Arduino Every or Nano, INA219, and SSD1306 OLED Screen
 
-  Version: 1.2
+  Version: 1.3
   Date: 2021 / 05 / 25
   Author: Austin St. Aubin
   Email: AustinSaintAubin@gmail.com
@@ -317,10 +317,12 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       display.fillRoundRect((SCREEN_WIDTH / 3), 0, (SCREEN_WIDTH / 3) * 1, 8, 2, INVERSE);
 //      display.drawFastHLine((SCREEN_WIDTH / 3), 8, (SCREEN_WIDTH / 3) * 1, INVERSE);
       
-      // Update Display Graph & Serial Plotting
+      // Update Display Graph(s)
       if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
         // Graph
+        graphVotage.store(voltage_load_V);
         graphWattage.plot(power_W);
+        graphCurrent.store(current_A);
         
         // Update Last Millis Time
         millis_last_update_graph = millis_current;
@@ -336,10 +338,11 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       displayValueUnit(voltage_load_V, "V", 2, (SCREEN_WIDTH / 2), 0, 0);
       displayValueUnit(current_A,      "A", 1, (SCREEN_WIDTH / 2), (SCREEN_WIDTH / 2), 0);
       
-      // Update Display Graph & Serial Plotting
+      // Update Display Graph(s)
       if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
         // Graph
         graphVotage.plot(voltage_load_V);
+        graphWattage.store(power_W);
         graphCurrent.plot(current_A);
         
         // Update Last Millis Time
@@ -364,6 +367,17 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //      Y_ROW = 16;  display.setCursor(0, Y_ROW); display.print("~:"); displayValueUnit(voltage_load_V_avg,     "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(current_A_avg,     "A", 1, 0, (SCREEN_WIDTH / 2) + TEXT_OFFSET, Y_ROW);
       Y_ROW = 16;  display.setCursor(0, Y_ROW); display.print("~:"); displayValueUnit(voltage_load_V_avg.get(),     "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(current_A_avg.get(),     "A", 1, 0, (SCREEN_WIDTH / 2) + TEXT_OFFSET, Y_ROW);
       Y_ROW = 24; display.setCursor(0, Y_ROW); display.print("-:"); displayValueUnit(voltage_load_V_min, "V", 2, 0, TEXT_OFFSET, Y_ROW); displayValueUnit(current_A_min,  "A", 1, 0, (SCREEN_WIDTH / 2) + TEXT_OFFSET, Y_ROW);
+
+      // Update Display Graph(s) in background
+      if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
+        // Graph
+        graphVotage.store(voltage_load_V);
+        graphWattage.store(power_W);
+        graphCurrent.store(current_A);
+        
+        // Update Last Millis Time
+        millis_last_update_graph = millis_current;
+      }
       
       break;
     case 3:  // Stats Screen ---------------------------
@@ -377,6 +391,17 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       Y_ROW = 8;  displayValueUnit(voltage_load_V,  "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(current_A,                 "A", 1, 0, (SCREEN_WIDTH / 2) + (TEXT_OFFSET / 2), Y_ROW);
       Y_ROW = 16; displayValueUnit(voltage_bus_V,   "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(voltage_bus_V * voltage_load_V_avg.get(), "W", 1, 0, (SCREEN_WIDTH / 2) + (TEXT_OFFSET / 2), Y_ROW);
       Y_ROW = 24; displayValueUnit(voltage_shunt_V, "V", 2, 0, TEXT_OFFSET, Y_ROW);  displayValueUnit(power_W,                   "W", 1, 0, (SCREEN_WIDTH / 2) + (TEXT_OFFSET / 2), Y_ROW);
+
+      // Update Display Graph(s) in background
+      if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
+        // Graph
+        graphVotage.store(voltage_load_V);
+        graphWattage.store(power_W);
+        graphCurrent.store(current_A);
+        
+        // Update Last Millis Time
+        millis_last_update_graph = millis_current;
+      }
       
       break;
     case 4:  // Battery Estimator Screen ---------------
@@ -400,6 +425,17 @@ void loop()  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // Display Runtime Timestamp
       sprintf(timestamp_buffer,"%02d:%02d:%02d", run_hours, run_minutes, run_seconds);
       Y_ROW = 24; display.setCursor(0, Y_ROW); display.print(timestamp_buffer); displayValueUnit(amp_hours, "AH", 1, 0, (SCREEN_WIDTH / 2), Y_ROW);
+
+      // Update Display Graph(s) in background
+      if (millis_current - millis_last_update_graph > UPDATE_RATE_GRAPH_MS) {
+        // Graph
+        graphVotage.store(voltage_load_V);
+        graphWattage.store(power_W);
+        graphCurrent.store(current_A);
+        
+        // Update Last Millis Time
+        millis_last_update_graph = millis_current;
+      }
       
       break;
   }
